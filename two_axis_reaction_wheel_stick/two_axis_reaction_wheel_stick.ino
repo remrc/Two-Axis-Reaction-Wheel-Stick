@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include <EEPROM.h>
 #include <PWM.h> 
 
 #define MPU6050       0x68         // Device address
@@ -23,7 +24,13 @@ float loop_time = 10;
 
 float alpha = 0.4; 
 
-float offsetX = -0.46, offsetY = 12.10;
+struct OffsetsObj {
+  int ID;
+  float X;
+  float Y;
+};
+
+OffsetsObj offsets;
 
 int pwm_X, pwm_Y = 0;
 byte brake_t = 1;   // stabdis - '0 stop'
@@ -59,6 +66,7 @@ float gyroZfilt, gyroYfilt;
 
 bool vertical = false;  
 bool calibrating = false;
+bool calibrated = false;
 
 uint8_t i2cData[14]; // Buffer for I2C data
 
@@ -98,7 +106,7 @@ void loop() {
     Tuning(); 
     angle_calc();
 
-    if (vertical) {
+    if (vertical && calibrated) {
       digitalWrite(BRAKE, HIGH);
       gyroZ = GyZ / 131.0; // Convert to deg/s
       gyroY = GyY / 131.0; // Convert to deg/s
@@ -112,16 +120,12 @@ void loop() {
       if (!calibrating) {
         Motor_controlX(pwm_X);
         motor_speed_pwmX += pwm_X;
-      } else {
-          Motor_controlX(0);
-      }
-      if (!calibrating) {
         Motor_controlY(pwm_Y);
         motor_speed_pwmY += pwm_Y;
       } else {
+          Motor_controlX(0);
           Motor_controlY(0);
       }
-      
       previousT_1 = currentT;
     } else {
       Motor_controlX(0);
@@ -131,8 +135,11 @@ void loop() {
       motor_speed_pwmY = 0;
     }
   }
-  if (currentT - previousT_2 >= 500) {
+  if (currentT - previousT_2 >= 2000) {
     battVoltage((double)analogRead(VBAT) / 38.4); // This is then connected to a 47k-12k voltage divider
+	if (!calibrated && !calibrating) {
+      Serial.println("first you need to calibrate the balancing point...");
+    }
     previousT_2 = currentT;
   }
 }

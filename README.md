@@ -10,6 +10,10 @@ Send p+ (or p+p+p+p+p+p+p+) for increase K1.
 
 Send p- (or p-p-p-p-p-p-p-) for decrease K1.
 
+Send i, s if you need to change K2, K3.
+
+Send c+ from serial monitor for calibrating procedure. Place the stick at the balancing point (as accurately as possible). Send c- from serial monitor. The stick will start balancing and write the offsets values ​​into the EEPROM.
+
 <img src="/pictures/stick1.jpg" alt="Balancing stick pic"/>
 <img src="/pictures/stick2.jpg" alt="Balancing stick pic"/>
 <img src="/pictures/schematic.png" alt="Schematic"/>

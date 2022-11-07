@@ -76,8 +76,8 @@ void angle_calc() {
   Acc_angleY = -atan2(AcZ, -AcX) * 57.2958;              //angle from acc. values  * 57.2958 (deg/rad)
   robot_angleY = robot_angleY * Gyro_amount + Acc_angleY * (1.0 - Gyro_amount);
   
-  angleX = robot_angleX - offsetX;
-  angleY = robot_angleY - offsetY;
+  angleX = robot_angleX - offsets.X;
+  angleY = robot_angleY - offsets.Y;
   
   if (abs(angleX) > 6 || abs(angleY) > 6) vertical = false;
   if (abs(angleX) < 0.3 && abs(angleY) < 0.3) vertical = true;
@@ -129,16 +129,33 @@ int Tuning() {
       printValues();
       break;  
     case 'c':
-      if (cmd == '+') {
-        calibrating = true;
+      if (cmd == '+' && !calibrating) {
+		 calibrating = true;
          Serial.println("calibrating on");
       }
-      if (cmd == '-')  {
+      if (cmd == '-' && calibrating)  {
+        calibrated = true;
         calibrating = false;
-        offsetX = robot_angleX;
-        offsetY = robot_angleY;
         Serial.println("calibrating off");
-        Serial.print("X: "); Serial.print(offsetX); Serial.print(" Y: "); Serial.println(offsetY);
+        Serial.print("X: "); Serial.print(robot_angleX); Serial.print(" Y: "); Serial.println(robot_angleY);
+        if (abs(robot_angleX) < 15 && abs(robot_angleY) < 15) {
+		  offsets.ID = 11;
+          offsets.X = robot_angleX;
+          offsets.Y = robot_angleY;
+          EEPROM.put(0, offsets);
+          digitalWrite(BUZZER, HIGH);
+          delay(70);
+          digitalWrite(BUZZER, LOW);
+        } else {
+          Serial.println("The angles are wrong!!!");
+          digitalWrite(BUZZER, HIGH);
+          delay(50);
+          digitalWrite(BUZZER, LOW);
+          delay(70);
+          digitalWrite(BUZZER, HIGH);
+          delay(50);
+          digitalWrite(BUZZER, LOW);
+        }
       }
       break;         
    }
