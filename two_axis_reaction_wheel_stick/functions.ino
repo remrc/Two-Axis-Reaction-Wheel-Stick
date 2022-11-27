@@ -139,7 +139,7 @@ int Tuning() {
         Serial.println("calibrating off");
         Serial.print("X: "); Serial.print(robot_angleX); Serial.print(" Y: "); Serial.println(robot_angleY);
         if (abs(robot_angleX) < 15 && abs(robot_angleY) < 15) {
-		  offsets.ID = 11;
+		      offsets.ID = 11;
           offsets.X = robot_angleX;
           offsets.Y = robot_angleY;
           EEPROM.put(0, offsets);

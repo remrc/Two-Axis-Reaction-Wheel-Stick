@@ -93,6 +93,9 @@ void setup() {
   pwmWrite(PWM_Y, 255);
   digitalWrite(BRAKE, HIGH);
   delay(1000);
+  EEPROM.get(0, offsets);
+  if (offsets.ID == 11) calibrated = true;
+    else calibrated = false;
   Serial.println("Calibrating gyroscope...");
   angle_setup();
 }
